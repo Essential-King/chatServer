@@ -49,7 +49,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
        channelGroup.forEach(ch->{
-           ch.writeAndFlush("用户["+ ctx.channel().remoteAddress()+"]离开，当前在线"+(channelGroup.size()-1)+"人\n");
+           ch.writeAndFlush("用户["+ ctx.channel().remoteAddress()+"]离开，当前在线"+channelGroup.size()+"人\n");
        });
     }
 }
