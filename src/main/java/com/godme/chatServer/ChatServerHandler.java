@@ -11,10 +11,15 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
    public static final  ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        if("many".equals(msg)){
+            ctx.writeAndFlush("当前在线人数："+channelGroup.size() + "人\n");
+            return;
+        }
         Channel channel = ctx.channel();
         String user = channel.remoteAddress().toString();
         channelGroup.forEach(ch->{
             if(ch == channel){
+                ch.writeAndFlush("[myself]:"+msg+"\n");
                 return;
             }
                 ch.writeAndFlush("["+user+"]:" + msg+"\n");
@@ -29,7 +34,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
         channelGroup.forEach(ch -> {
-            ch.writeAndFlush("用户[" + channel.remoteAddress() + "]加入\n");
+            ch.writeAndFlush("用户[" + channel.remoteAddress() + "]加入，当前在线"+(channelGroup.size()+1)+"人\n");
         });
         channelGroup.add(channel);
     }
@@ -44,7 +49,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
        channelGroup.forEach(ch->{
-           ch.writeAndFlush("用户["+ ctx.channel().remoteAddress()+"]离开\n");
+           ch.writeAndFlush("用户["+ ctx.channel().remoteAddress()+"]离开，当前在线"+(channelGroup.size()-1)+"人\n");
        });
     }
 }
